@@ -5,7 +5,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import DrawerComponent from './DrawerComponent';
 
 function Header() {
-  const [value, setValue] = useState();
+  const [value, setValue] = useState('Inicio');
   const theme = useTheme();
   const isMatch = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -35,9 +35,9 @@ function Header() {
                       onChange={(e,value) => setValue(value)} 
                       indicatorColor="#F7F7F7"
                     >
-                      <Tab label='Inicio' to='/' component={Link}/>
-                      <Tab label='Estudio' to='/estudio' component={Link} />
-                      <Tab label='Estadistica' to='/estadistica' component={Link}/>
+                      <Tab value="Inicio" label='Inicio' to='/' component={Link}/>
+                      <Tab value="Estudio" label='Estudio' to='/estudio' component={Link} />
+                      <Tab value="Estadistica" label='Estadistica' to='/estadistica' component={Link}/>
                     </Tabs>
                   </>
                 )
