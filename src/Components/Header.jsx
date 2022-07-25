@@ -11,7 +11,7 @@ function Header() {
 
   return (
     <React.Fragment>
-        <AppBar sx={{ background: "#222831" }}>
+        <AppBar sx={{ background: "#222831" }} position="sticky">
             <Toolbar>
               {
                 isMatch ? (

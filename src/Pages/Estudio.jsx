@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function Estudio() {
   return (
-    <div style={{marginTop: '100px'}}>
+    <div style={{height: '100%'}}>
         Estudio
     </div>
   )
