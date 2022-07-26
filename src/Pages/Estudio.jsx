@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Alert, Button, CircularProgress, Grid } from '@mui/material'
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
@@ -9,16 +9,18 @@ import Map, {
   NavigationControl,
   FullscreenControl,
   ScaleControl,
-  GeolocateControl
+  GeolocateControl,
 } from 'react-map-gl';
-import MarkerIcon from "./../Assets/Images/marker.png";
-import Pin from './pin';
+
+
 import AnalysisIcon from "./../Assets/Images/analysis.png";
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MAPBOX_KEY } from '../Config/Constants';
+import Pin from './pin';
 const mapboxApiKey = MAPBOX_KEY;
 
 export default function Estudio() {
+  const mapRef = useRef(null);
 
   const [viewState, setViewState] = React.useState({
     latitude: 19.504381750408218,
@@ -26,11 +28,14 @@ export default function Estudio() {
     zoom: 11
   });
 
+  const [positionSelected, setPositionSelected] = useState();
+
   const [results, setResults] = useState();
   const [loading, setLoading] = useState(false);
 
   const makeAnalysis = () => {
     // API FETCH
+    
     //on Success
     setLoading(true);
     setTimeout(
@@ -42,76 +47,80 @@ export default function Estudio() {
     );
   }
 
+  const handlePositionSelectedMap = (positionCords) => {
+    setPositionSelected(positionCords);
+    mapRef.current.flyTo({
+      center: [positionCords.lng, positionCords.lat],
+      zoom: 16,
+      essential: true
+    })
+  }
+
   return (
-    <div style={{ height: '100vh', padding: "10px" }}>
+    <div style={{ height: '100%', padding: "10px" }}>
       {/* Estudio */}
       <Grid container spacing={2} columns={12}>
-        <Grid item md={8}>
-          <div>
-            <div style={{ width: "100%", height: 600 }}>
-              <Map
-                mapboxAccessToken={mapboxApiKey}
-                style={{ width: "100%" }}
-                initialViewState={viewState}
-                onMove={(view) => { setViewState(view) }}
-                mapStyle="mapbox://styles/mapbox/streets-v11"
-              >
-                <GeolocateControl position="top-left" />
-                <FullscreenControl position="top-left" />
-                <NavigationControl position="top-left" />
-                <ScaleControl />
+        <Grid item xs={12} md={7} lg={8}>
+          <div style={{ width: "100%", height: "80vh" }}>
+            <Map
+              mapboxAccessToken={mapboxApiKey}
+              style={{ width: "100%" }}
+              initialViewState={viewState}
+              onMove={(view) => { setViewState(view) }}
+              ref={mapRef}
+              mapStyle="mapbox://styles/mapbox/streets-v11"
+              onClick={(position) => { handlePositionSelectedMap(position.lngLat) }}
+            >
+              <GeolocateControl position="top-left" />
+              <FullscreenControl position="top-left" />
+              <NavigationControl position="top-left" />
+              <ScaleControl />
+              {
 
-                <Marker latitude={19.506381750408218}
-                  longitude={-99.14177597567123}
-                  onClose={() => { }}
+                positionSelected && <Marker latitude={positionSelected.lat}
+                  longitude={positionSelected.lng}
                   anchor="bottom"
                 >
                   <Pin />
                 </Marker>
-                <Marker latitude={19.406381750408218}
-                  longitude={-99.14177597567123}
-                  onClose={() => { }}
-                  anchor="bottom"
-                >
-                  <img src={MarkerIcon} style={{ width: "16px", height: "26px" }} alt="icon" />
-                </Marker>
-              </Map>
-            </div>
+              }
+
+            </Map>
           </div>
         </Grid>
-        <Grid item md={4}
+        <Grid item xs={12} md={5} lg={4}
           container
           spacing={0}
           direction="column"
           alignItems="center"
         >
-            <Search>
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search…"
+              inputProps={{ 'aria-label': 'search' }}
+            />
+            <Button style={{ height: 40, maxWidth: 10, backgroundColor: "rgba(0, 0, 0, 0.8)" }} >
               <SearchIconWrapper>
-                <SearchIcon />
+                <SearchIcon style={{ color: "white" }} />
               </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ 'aria-label': 'search' }}
-              />
-              <Button style={{ height: 40, maxWidth: 10, backgroundColor: "rgba(0, 0, 0, 0.8)" }} >
-                <SearchIconWrapper>
-                  <SearchIcon style={{ color: "white" }} />
-                </SearchIconWrapper>
+            </Button>
+          </Search>
+          <br />
+          <div style={{ textAlign: "center", paddingTop: "60px" }}>
+            <div>
+              <Button onClick={() => { makeAnalysis() }} style={{ backgroundColor: "#FFC300", color: "black", padding: "8px 16px 8px 16px" }} >
+                <strong> Estudio de Mercado </strong>
               </Button>
-            </Search>
-            <br />
-            <div style={{ textAlign: "center", paddingTop: "60px" }}>
-              <div>
-                <Button onClick={() => { makeAnalysis() }} style={{ backgroundColor: "#FFC300", color: "black", padding: "8px 16px 8px 16px" }} >
-                  <strong> Estudio de Mercado </strong>
-                </Button>
-                <br/>  <br/>
-                <img src={AnalysisIcon} style={{ width:"30%", height:"auto", opacity:"0.1" }} alt="icon" />
-              </div>
-              <div style={{ paddingTop: "100px" }}>
-                {loading ? <CircularProgress /> : results ? <Alert severity="success">{results}</Alert> : ""}
-              </div>
+              <br />  <br />
+              <img src={AnalysisIcon} style={{ width: "30%", height: "auto", opacity: "0.1" }} alt="icon" />
             </div>
+            <div style={{ paddingTop: "100px" }}>
+              {loading ? <CircularProgress /> : results ? <Alert severity="success">{results}</Alert> : ""}
+            </div>
+          </div>
         </Grid>
       </Grid>
     </div>
