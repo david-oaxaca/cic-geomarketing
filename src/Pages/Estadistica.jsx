@@ -17,7 +17,7 @@ export default function Estadistica() {
       <Grid container spacing={2}>
         {charts.map(chart => (
           <Grid item xs={12} sm={6} md={4}>
-            <ChartCard title={chart.title} info={chart.info}></ChartCard>
+            <ChartCard title={chart.title} info={chart.info} state={chart.state} type={chart.type}></ChartCard>
           </Grid>
         ))}
       </Grid>
