@@ -24,7 +24,7 @@ function Header() {
 
   return (
     <React.Fragment>
-      <AppBar sx={{ background: "#222831"}} position="sticky">
+      <AppBar sx={{ background: "#222831" }} position="sticky">
         <Toolbar>
           {
             isMatch ? (
@@ -46,7 +46,7 @@ function Header() {
                 <Tabs textColor="inherit"
                   value={value}
                   onChange={(e, value) => setValue(value)}
-                  indicatorColor="secondary"
+                  TabIndicatorProps={{ style: { background: 'rgb(255, 195, 0)' } }}
                 >
                   <Tab value="Inicio" label='Inicio' to='/' component={Link} />
                   <Tab value="Estudio" label='Estudio' to='/estudio' component={Link} />

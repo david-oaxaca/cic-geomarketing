@@ -24,10 +24,10 @@ export default function Home() {
   return (
     <div>
       {/* Inicio */}
-      <div style={{ width: "100vw", height: "90vh" }}>
+      <div style={{ width: "100vw", height: "80vh" }}>
         <Map
           mapboxAccessToken={mapboxApiKey}
-          style={{ width: "100$" }}
+          style={{ width: "100%" }}
           initialViewState={viewState}
           onMove={(view) => { setViewState(view) }}
           mapStyle="mapbox://styles/mapbox/streets-v11"
