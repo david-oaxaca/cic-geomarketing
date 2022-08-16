@@ -1,58 +1,44 @@
-import React from 'react';
-import Map, {
-  Marker,
-  NavigationControl,
-  FullscreenControl,
-  ScaleControl,
-  GeolocateControl
-} from 'react-map-gl';
-import MarkerIcon from "./../Assets/Images/marker.png";
-import Pin from './pin';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer} from 'react-leaflet';
 import { MAPBOX_KEY } from '../Config/Constants';
+import axios from "axios";
+import ShowMarkersCluster from '../Components/ClusterData/ShowMarkersCluster';
+
+const mapboxUriTileLayer = "https://api.mapbox.com/styles/v1/medinavilla/cl6v5mk8w000t14mtzhgb5kbd/tiles/256/{z}/{x}/{y}@2x?access_token=" + MAPBOX_KEY
 
 export default function Home() {
+  const mapRef = useRef(null);
+  const [zoom] = useState(5);
+  const [data, setData] = useState([])
 
-  const mapboxApiKey = MAPBOX_KEY;
+  const [loading, setLoading] = useState(true);
 
-  const [viewState, setViewState] = React.useState({
-    latitude: 19.504381750408218,
-    longitude: -99.14677597567123,
-    zoom: 11
-  });
+  useEffect(() => {
+    // DATA fetcj
+    axios.get("https://data.police.uk/api/crimes-street/all-crime?lat=52.629729&lng=-1.131592&date=2019-10").then((res) => {
+      setData(res.data);
+      setLoading(false);
+    })
+  }, [])
 
-  return (
-    <div>
-      {/* Inicio */}
-      <div style={{ width: "100vw", height: "80vh" }}>
-        <Map
-          mapboxAccessToken={mapboxApiKey}
-          style={{ width: "100%" }}
-          initialViewState={viewState}
-          onMove={(view) => { setViewState(view) }}
-          mapStyle="mapbox://styles/mapbox/streets-v11"
-        >
-          <GeolocateControl position="top-left" />
-          <FullscreenControl position="top-left" />
-          <NavigationControl position="top-left" />
-          <ScaleControl />
-
-          <Marker latitude={19.506381750408218}
-            longitude={-99.14177597567123}
-            onClose={() => { }}
-            anchor="bottom"
+  if (loading) return <div>Cargando...</div>; else {
+    return (
+      <div>
+        {/* Inicio */}
+        <div style={{ width: "100vw", height: "80vh" }}>
+          <MapContainer
+            center={[52.6376, -1.135171]}
+            zoom={zoom}
+            ref={mapRef}
+            style={{ height: '100%' }}
           >
-            <Pin />
-          </Marker>
-          <Marker latitude={19.406381750408218}
-            longitude={-99.14177597567123}
-            onClose={() => { }}
-            anchor="bottom"
-          >
-            <img src={MarkerIcon} style={{ width: "16px", height: "26px" }} alt="icon" />
-          </Marker>
-        </Map>
+            <TileLayer
+              url={mapboxUriTileLayer}
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
+            <ShowMarkersCluster data={data}/>
+          </MapContainer>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 }

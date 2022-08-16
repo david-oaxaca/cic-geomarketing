@@ -3,33 +3,24 @@ import { Alert, Button, CircularProgress, Grid } from '@mui/material'
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
-import Map, {
-  Marker,
-  NavigationControl,
-  FullscreenControl,
-  ScaleControl,
-  GeolocateControl,
-} from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-import { MAPBOX_KEY } from '../Config/Constants';
+import { MapContainer, TileLayer, useMapEvents, Marker } from 'react-leaflet';
+
 import AnalysisIcon from "./../Assets/Images/analysis.png";
-import Pin from './pin';
+import { iconMarker } from '../Components/MarkerIcon';
 import { forwardGeocoding, reverseGeocoding } from '../Utils/Geocoder';
 
+import { MAPBOX_KEY } from '../Config/Constants';
+
+import 'react-toastify/dist/ReactToastify.css';
+
 const mapboxApiKey = MAPBOX_KEY;
+const mapboxUriTileLayer = "https://api.mapbox.com/styles/v1/medinavilla/cl6v5mk8w000t14mtzhgb5kbd/tiles/256/{z}/{x}/{y}@2x?access_token=" + MAPBOX_KEY
 
 export default function Estudio() {
   const mapRef = useRef(null);
-
-  const [viewState, setViewState] = React.useState({
-    latitude: 19.504381750408218,
-    longitude: -99.14677597567123,
-    zoom: 11
-  });
+  const zoom = 13;
 
   const [positionSelected, setPositionSelected] = useState();
 
@@ -40,13 +31,11 @@ export default function Estudio() {
   const [search, setSearch] = useState("");
 
   const makeAnalysis = () => {
-    if(!positionSelected){
+    if (!positionSelected) {
       notifyInfo("Selecciona un punto en el mapa o propociona una dirección")
-      return ;
+      return;
     }
     // API FETCH
-
-    //on Success
     setLoading(true);
     setTimeout(
       () => {
@@ -62,11 +51,7 @@ export default function Estudio() {
     if (response.status === 200) {
       if (response.message) { // If we had a address, change Marker Position Map
         setPositionSelected(positionCords);
-        mapRef.current.flyTo({
-          center: [positionCords.lng, positionCords.lat],
-          zoom: 16,
-          essential: true
-        })
+        mapRef.current.flyTo(positionCords, 16)
         setSearch(response.message);
       }
     } else {
@@ -79,15 +64,12 @@ export default function Estudio() {
       let response = await forwardGeocoding(search, mapboxApiKey);
       if (response.status === 200) {
         if (response.message) { // If we had coords, change Marker Position Map
-          setPositionSelected({
+          let coords = {
             lng: response.message[0],
             lat: response.message[1]
-          });
-          mapRef.current.flyTo({
-            center: [response.message[0], response.message[1]],
-            zoom: 16,
-            essential: true
-          })
+          }
+          setPositionSelected(coords);
+          mapRef.current.flyTo(coords, 16)
         }
       } else {
         notifyWarn("No se ha podido encontrar una ubicación dada la dirección proporcionada");
@@ -97,37 +79,35 @@ export default function Estudio() {
     }
   }
 
-  const notifyWarn = (message) => toast.warn(message);
-  const notifyInfo = (message) => toast.info(message);
+  function LocationMarker() {
+    useMapEvents({
+      click(e) {
+        handlePositionSelectedMap(e.latlng)
+      }
+    })
+  }
 
   return (
     <div style={{ height: '100%', padding: "10px" }}>
       {/* Estudio */}
       <Grid container spacing={1} columns={12} >
         <Grid item xs={12} md={7} lg={8}>
-          <div style={{ width: "100%", height: "70vh" }}>
-            <Map
-              mapboxAccessToken={mapboxApiKey}
-              style={{ width: "100%" }}
-              initialViewState={viewState}
-              onMove={(view) => { setViewState(view) }}
+          <div style={{ width: "100%", height: "80vh" }}>
+            <MapContainer
+              center={[19.504381750408218, -99.14677597567123]}
+              zoom={zoom}
               ref={mapRef}
-              mapStyle="mapbox://styles/mapbox/streets-v11"
-              onClick={(position) => { handlePositionSelectedMap(position.lngLat) }}
+              style={{ height: '100%' }}
+
             >
-              <GeolocateControl position="top-left" />
-              <FullscreenControl position="top-left" />
-              <NavigationControl position="top-left" />
-              <ScaleControl />
+              <TileLayer
+                url={mapboxUriTileLayer}
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
+              <LocationMarker />
               {
-                positionSelected && <Marker latitude={positionSelected.lat}
-                  longitude={positionSelected.lng}
-                  anchor="bottom"
-                >
-                  <Pin />
-                </Marker>
+                positionSelected && <Marker position={positionSelected} icon={iconMarker} />
               }
-            </Map>
+            </MapContainer>
           </div>
         </Grid>
         <Grid item xs={12} md={5} lg={4}
@@ -141,7 +121,6 @@ export default function Estudio() {
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
-              // ref={inputRef}
               inputRef={inputRef}
               value={search}
               onChange={(event) => { setSearch(event.currentTarget.value) }}
@@ -178,6 +157,9 @@ export default function Estudio() {
     </div>
   )
 }
+
+const notifyWarn = (message) => toast.warn(message);
+const notifyInfo = (message) => toast.info(message);
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
