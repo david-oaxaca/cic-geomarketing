@@ -6,6 +6,7 @@ import Estudio from '../Pages/Estudio';
 import Estadistica from '../Pages/Estadistica';
 import { createTheme, ThemeProvider } from '@mui/material';
 import '../Assets/Styles/App.css';
+import Maps from '../Pages/Maps';
 
 const App = () => {
     const theme = createTheme({
@@ -19,7 +20,8 @@ const App = () => {
                 <Layout>
                     <Routes>
                         <Route exact path="/" element={<Home />} />
-                        <Route exact path="/estudio" element={<Estudio />} />
+                        <Route exact path="/consulta" element={<Estudio />} />
+                        <Route exact path="/mapas" element={<Maps />} />
                         <Route exact path="/estadistica" element={<Estadistica />} />
                     </Routes>
                 </Layout>

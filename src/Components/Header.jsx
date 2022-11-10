@@ -18,6 +18,8 @@ function Header() {
       setValue("Estudio");
     } else if (path === "estadistica") {
       setValue("Estadistica");
+    }else if (path === "mapas") {
+      setValue("Mapas");
     }
   }, []);
 
@@ -49,7 +51,8 @@ function Header() {
                   TabIndicatorProps={{ style: { background: 'rgb(255, 195, 0)' } }}
                 >
                   <Tab value="Inicio" label='Inicio' to='/' component={Link} />
-                  <Tab value="Estudio" label='Estudio' to='/estudio' component={Link} />
+                  <Tab value="Estudio" label='Consulta' to='/consulta' component={Link} />
+                  <Tab value="Mapas" label='Mapas' to='/mapas' component={Link} />
                   <Tab value="Estadistica" label='Estadistica' to='/estadistica' component={Link} />
                 </Tabs>
               </>
